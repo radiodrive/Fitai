@@ -196,7 +196,7 @@ class AgentService {
 
       // Use the single file version
       const pythonProcess = spawn('python3', [
-        './agents/fitness_ai_single.py',
+        './agents/fitness_ai_single.py',  // ← Make sure this path is correct
         JSON.stringify(payload)
       ]);
 
