@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 // server.js - Updated Node.js Backend with GarminDB Integration
 const express = require('express');
 const cors = require('cors');
@@ -19,7 +21,9 @@ let garminCache = {};
 // GarminDB Service Integration
 class GarminDBService {
   constructor() {
-    this.garmindbPath = process.env.GARMINDB_PATH || path.join(process.env.HOME, 'GarminDB');
+    const userHome = process.env.USERPROFILE || process.env.HOME || 'C:\\Users\\' + (process.env.USERNAME || 'Default');
+    this.garmindbPath = process.env.GARMINDB_PATH || path.join(userHome, 'GarminDB');
+    console.log(`📍 GarminDB path set to: ${this.garmindbPath}`);
     this.pythonService = path.join(__dirname, 'garmindb_service.py');
   }
 
@@ -32,7 +36,7 @@ class GarminDBService {
       };
 
       // Spawn Python process to interact with GarminDB
-      const pythonProcess = spawn('python3', [
+      const pythonProcess = spawn('python', [
         this.pythonService,
         JSON.stringify(payload)
       ]);
@@ -71,6 +75,7 @@ class GarminDBService {
     });
   }
 
+  
   getFallbackData(action) {
     const fallbackData = {
       get_latest_metrics: {
@@ -84,10 +89,11 @@ class GarminDBService {
           activityName: 'Morning Walk',
           sport: 'walking',
           distance: 3200,
-          calories: 180
+          calories: 180,
+          duration: 1800
         },
-        recoveryStatus: 'Demo Mode - Good Recovery',
-        recoveryAdvice: 'This is demo data. Connect your Garmin device for real insights.',
+        recoveryStatus: 'Good Recovery - Demo Mode',
+        recoveryAdvice: 'This is demo data. Install GarminDB for real fitness insights.',
         timestamp: new Date().toISOString(),
         dataSource: 'fallback'
       },
@@ -113,7 +119,15 @@ class GarminDBService {
       }
     };
 
-    return fallbackData[action] || { error: 'Unknown action' };
+    return fallbackData[action] || { 
+      error: 'Unknown action',
+      steps: 8500,
+      averageHeartRate: 75,
+      sleepScore: 80,
+      stressLevel: 30,
+      recoveryStatus: 'Demo Mode',
+      dataSource: 'fallback'
+    };
   }
 
   async getLatestMetrics(userId) {
